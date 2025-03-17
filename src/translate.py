@@ -4,139 +4,434 @@ import pytesseract
 from googletrans import Translator
 from PIL import ImageGrab
 import time
+import pyttsx3
 import configparser
+import logging
+from logging.handlers import RotatingFileHandler
+from functools import wraps
+import json
+import os
+from cryptography.fernet import Fernet
+from datetime import datetime, timedelta
+import threading
 
-# Configuração do Tesseract (precisa estar instalado no sistema)
+# Configuração do Tesseract
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
+# Configuração de logging
+def setup_logging():
+    log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    log_file = 'translator.log'
+    handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=3)
+    handler.setFormatter(log_formatter)
+    logger = logging.getLogger('TranslatorApp')
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+    return logger
+
+logger = setup_logging()
+
 # Variáveis globais
+resultado_janela = None
+label_resultado = None
 fechar_automaticamente = False
-tempo_fechamento = 10  # Tempo padrão de 10 segundos
-menu_aberto = False  # Definição da variável global menu_aberto
-tema_escuro = True  # Definir tema escuro como padrão
+tempo_fechamento = 10
+menu_aberto = False
+tema_escuro = True
+traducao_em_tempo_real = False
+ultima_traducao = ""
+intervalo_atualizacao = 1.0
+movendo = False
+redimensionando = False
+pos_x = 0
+pos_y = 0
 
-# Carregar configurações
-config = configparser.ConfigParser()
-config.read('config.ini')
+# Classes
+class RateLimiter:
+    def __init__(self, max_requests=60, time_window=60):
+        self.max_requests = max_requests
+        self.time_window = time_window
+        self.requests = []
+    
+    def can_proceed(self):
+        current_time = time.time()
+        # Remove requests mais antigos que time_window
+        self.requests = [req for req in self.requests 
+                        if current_time - req < self.time_window]
+        
+        # Verifica se ainda pode fazer mais requisições
+        if len(self.requests) < self.max_requests:
+            self.requests.append(current_time)
+            return True
+        return False
 
-# Função para capturar a tela atrás da janela e traduzir
-def capturar_e_traduzir():
-    # Pequeno atraso para evitar capturar a própria janela
-    tk_root.withdraw()
-    time.sleep(0.5)
+class SecurityManager:
+    def __init__(self):
+        self.key = self._load_or_create_key()
+        self.cipher_suite = Fernet(self.key)
+        
+    def _load_or_create_key(self):
+        key_file = 'secret.key'
+        if os.path.exists(key_file):
+            with open(key_file, 'rb') as f:
+                return f.read()
+        else:
+            key = Fernet.generate_key()
+            with open(key_file, 'wb') as f:
+                f.write(key)
+            return key
     
-    x = tk_root.winfo_x()
-    y = tk_root.winfo_y()
-    w = tk_root.winfo_width()
-    h = tk_root.winfo_height()
+    def encrypt_data(self, data):
+        return self.cipher_suite.encrypt(data.encode()).decode()
     
-    imagem = ImageGrab.grab(bbox=(x, y, x + w, y + h))
-    tk_root.deiconify()
+    def decrypt_data(self, encrypted_data):
+        return self.cipher_suite.decrypt(encrypted_data.encode()).decode()
+
+class SpeechManager:
+    def __init__(self):
+        self.engine = pyttsx3.init()
+        self.is_speaking = False
+        self.voice_enabled = True
+        self.current_voice = 'pt'
+        self._load_voices()
+
+    def _load_voices(self):
+        self.available_voices = {}
+        voice_names = {
+            'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_PT-BR_MARIA_11.0': 'Maria (Português)',
+            'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_EN-US_DAVID_11.0': 'David (English)',
+            'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_EN-US_ZIRA_11.0': 'Zira (English)'
+        }
+        
+        for voice in self.engine.getProperty('voices'):
+            friendly_name = voice_names.get(voice.id, voice.name)
+            self.available_voices[friendly_name] = voice
+
+    def set_voice(self, friendly_name):
+        if friendly_name in self.available_voices:
+            voice = self.available_voices[friendly_name]
+            self.engine.setProperty('voice', voice.id)
+            self.current_voice = friendly_name
+            self.engine.setProperty('rate', 180)
+            self.engine.setProperty('volume', 1.0)
+
+    def _preprocess_text(self, text):
+        if "Current Date and Time" in text:
+            parts = text.split('\n')
+            if len(parts) > 2:
+                text = '\n'.join(parts[2:])
+        
+        text = text.replace(".", ". ")
+        text = text.replace("!", "! ")
+        text = text.replace("?", "? ")
+        text = text.replace("\n", " ")
+        
+        return ' '.join(text.split())
+
+    def speak(self, text):
+        if not self.voice_enabled:
+            return
+        if self.is_speaking:
+            self.stop()
+        
+        self.engine.setProperty('rate', 180)
+        self.engine.setProperty('volume', 1.0)
+        
+        processed_text = self._preprocess_text(text)
+        sentences = processed_text.split('. ')
+        
+        self.is_speaking = True
+        for sentence in sentences:
+            if sentence.strip():
+                self.engine.say(sentence.strip())
+                self.engine.runAndWait()
+                if len(sentences) > 1:
+                    time.sleep(0.3)
+        self.is_speaking = False
+
+    def stop(self):
+        if self.is_speaking:
+            self.engine.stop()
+            self.is_speaking = False
+
+    def toggle_voice(self):
+        self.voice_enabled = not self.voice_enabled
+        return self.voice_enabled
+
+class SecureTranslator:
+    def __init__(self):
+        self.security = SecurityManager()
+        self.speech = SpeechManager()
+        self.translator = Translator()
+        self.last_translation = ""
+        self.last_translation_time = None
+        self.rate_limiter = RateLimiter()
     
-    texto_extraido = pytesseract.image_to_string(imagem, lang='eng').strip()
+    def translate_and_speak(self, text, src='en', dest='pt'):
+        try:
+            if not self.rate_limiter.can_proceed():
+                logger.warning("Rate limit exceeded")
+                raise Exception("Muitas requisições. Aguarde um momento.")
+
+            if not self._validate_input(text):
+                logger.warning(f"Invalid input detected: {text[:100]}")
+                return None
+            
+            if (text == self.last_translation and 
+                self.last_translation_time and 
+                datetime.now() - self.last_translation_time < timedelta(seconds=1)):
+                return None
+            
+            translation = self.translator.translate(text, src=src, dest=dest)
+            translated_text = translation.text
+            
+            self.last_translation = text
+            self.last_translation_time = datetime.now()
+            
+            logger.info(f"Translation performed: {len(text)} chars -> {len(translated_text)} chars")
+            
+            if self.speech.voice_enabled:
+                self.speech.speak(translated_text)
+            
+            return translated_text
+            
+        except Exception as e:
+            logger.error(f"Translation error: {str(e)}")
+            raise
     
-    if not texto_extraido:
-        messagebox.showwarning("Aviso", "Nenhum texto detectado na área selecionada!")
+    def _validate_input(self, text):
+        if not text or len(text) > 5000:
+            return False
+        suspicious_patterns = [
+            '<script', 'javascript:', 'data:',
+            'vbscript:', 'onload=', 'onerror='
+        ]
+        return not any(pattern in text.lower() for pattern in suspicious_patterns)
+
+# Initialize managers
+secure_translator = SecureTranslator()
+
+# Functions
+def finalizar_programa():
+    if 'resultado_janela' in globals() and resultado_janela:
+        resultado_janela.destroy()
+    tk_root.quit()
+
+def criar_janela_resultado():
+    global resultado_janela, label_resultado
+    
+    if resultado_janela is not None:
         return
-    
-    translator = Translator()
-    texto_traduzido = translator.translate(texto_extraido, src='en', dest='pt').text
-    
-    # Criar uma nova janela para exibir o resultado de forma estilizada
+        
     resultado_janela = tk.Toplevel(tk_root)
-    resultado_janela.title("Tradução")
-    resultado_janela.geometry("600x300")  # Tornar a janela mais retangular
-    resultado_janela.configure(bg="#1e1e1e" if tema_escuro else "#FFFFFF")  # Cor de fundo baseada no tema
+    resultado_janela.title("Tradução em Tempo Real")
+    resultado_janela.geometry("600x300")
+    resultado_janela.configure(bg="#1e1e1e" if tema_escuro else "#FFFFFF")
     resultado_janela.attributes('-topmost', True)
     
-    # Centralizando a janela de tradução
     screen_width = resultado_janela.winfo_screenwidth()
     screen_height = resultado_janela.winfo_screenheight()
     window_width = 600
     window_height = 300
     position_top = (screen_height // 2) - (window_height // 2)
     position_left = (screen_width // 2) - (window_width // 2)
-
-    # Posicionar a janela de tradução no centro da tela
     resultado_janela.geometry(f'{window_width}x{window_height}+{position_left}+{position_top}')
     
-    label_resultado = tk.Label(resultado_janela, text=texto_traduzido, wraplength=580, 
-                               fg="white" if tema_escuro else "black", bg="#1e1e1e" if tema_escuro else "#FFFFFF",
-                               font=("Arial", 14, "bold"), padx=20, pady=20, justify="center")
+    label_resultado = tk.Label(resultado_janela, text="", wraplength=580,
+                             fg="white" if tema_escuro else "black",
+                             bg="#1e1e1e" if tema_escuro else "#FFFFFF",
+                             font=("Arial", 14, "bold"), padx=20, pady=20,
+                             justify="center")
     label_resultado.pack(expand=True, fill="both")
-    
-    # Fechar automaticamente, se a opção estiver marcada
-    if fechar_automaticamente:
-        tempo_fechamento_ms = int(tempo_fechamento) * 1000  # Converter para milissegundos
-        resultado_janela.after(tempo_fechamento_ms, resultado_janela.destroy)
-    
-    # Fechar a janela ao clicar em qualquer lugar ou pressionar uma tecla
-    resultado_janela.bind("<Button-1>", lambda e: resultado_janela.destroy())
-    resultado_janela.bind("<KeyPress>", lambda e: resultado_janela.destroy())
 
-# Função para abrir a janela de configurações
+def capturar_e_traduzir():
+    try:
+        tk_root.withdraw()
+        time.sleep(0.5)
+        
+        x = tk_root.winfo_x()
+        y = tk_root.winfo_y()
+        w = tk_root.winfo_width()
+        h = tk_root.winfo_height()
+        
+        imagem = ImageGrab.grab(bbox=(x, y, x + w, y + h))
+        tk_root.deiconify()
+        
+        texto_extraido = pytesseract.image_to_string(imagem, lang='eng').strip()
+        
+        if not texto_extraido:
+            logger.warning("No text detected")
+            return
+        
+        texto_traduzido = secure_translator.translate_and_speak(texto_extraido)
+        
+        if texto_traduzido:
+            mostrar_resultado(texto_traduzido)
+            
+    except Exception as e:
+        logger.error(f"Error in capture_and_translate: {str(e)}")
+        messagebox.showerror("Erro", f"Erro durante a tradução: {str(e)}")
+
+def mostrar_resultado(texto_traduzido):
+    global resultado_janela, label_resultado
+    
+    if resultado_janela is None:
+        criar_janela_resultado()
+    
+    label_resultado.config(text=texto_traduzido)
+    
+    if fechar_automaticamente:
+        resultado_janela.after(int(tempo_fechamento) * 1000, 
+                             lambda: resultado_janela.destroy())
+
+def iniciar_traducao_tempo_real():
+    global traducao_em_tempo_real
+    traducao_em_tempo_real = True
+    criar_janela_resultado()
+    
+    thread_traducao = threading.Thread(target=atualizar_traducao, daemon=True)
+    thread_traducao.start()
+    
+    botao_traduzir.configure(text="Parar Tradução", 
+                            command=parar_traducao_tempo_real)
+
+def parar_traducao_tempo_real():
+    global traducao_em_tempo_real, resultado_janela, label_resultado
+    traducao_em_tempo_real = False
+    
+    if resultado_janela:
+        resultado_janela.destroy()
+        resultado_janela = None
+        label_resultado = None
+    
+    botao_traduzir.configure(text="Traduzir", 
+                            command=alternar_modo_traducao)
+
+def alternar_modo_traducao():
+    if not traducao_em_tempo_real:
+        iniciar_traducao_tempo_real()
+    else:
+        parar_traducao_tempo_real()
+
+def atualizar_traducao():
+    while traducao_em_tempo_real:
+        capturar_e_traduzir()
+        time.sleep(intervalo_atualizacao)
+
+def abrir_menu(event):
+    global menu_aberto
+    if menu_aberto:
+        menu_opcoes.unpost()
+        menu_aberto = False
+    else:
+        menu_opcoes.post(event.x_root, event.y_root)
+        menu_aberto = True
+
 def abrir_configuracoes():
-    # Criar a janela de configurações
     config_janela = tk.Toplevel(tk_root)
     config_janela.title("Configurações")
-    config_janela.geometry("400x300")
+    config_janela.geometry("400x500")
     
-    # Variáveis de configurações
+    # Variáveis
     fechar_automaticamente_var = tk.BooleanVar(value=fechar_automaticamente)
     tempo_fechamento_var = tk.StringVar(value=str(tempo_fechamento))
     tema_var = tk.BooleanVar(value=tema_escuro)
+    intervalo_var = tk.StringVar(value=str(intervalo_atualizacao))
+    narracao_var = tk.BooleanVar(value=secure_translator.speech.voice_enabled)  # Nova variável para controlar a narração
     
-    # Opção de "Fechar tradução automaticamente"
-    fechar_checkbutton = tk.Checkbutton(config_janela, text="Fechar tradução automaticamente", 
-                                        variable=fechar_automaticamente_var)
-    fechar_checkbutton.pack(pady=10)
+    # Frame de configurações
+    frame_config = ttk.Frame(config_janela, padding="10")
+    frame_config.pack(fill="both", expand=True)
     
-    # Campo para inserir o tempo em segundos
-    tempo_label = tk.Label(config_janela, text="Tempo (em segundos) para fechar:")
-    tempo_label.pack()
-    tempo_entry = tk.Entry(config_janela, textvariable=tempo_fechamento_var)
-    tempo_entry.pack(pady=10)
-
-    # Opção para tema claro/escuro
-    tema_checkbutton = tk.Checkbutton(config_janela, text="Usar tema escuro", 
-                                      variable=tema_var)
-    tema_checkbutton.pack(pady=10)
+    # Opções gerais
+    ttk.Label(frame_config, text="Configurações Gerais", 
+              font=("Arial", 12, "bold")).pack(pady=10)
     
-    # Botão de salvar as configurações
+    ttk.Checkbutton(frame_config, text="Fechar tradução automaticamente",
+                    variable=fechar_automaticamente_var).pack(pady=5)
+    
+    ttk.Label(frame_config, text="Tempo para fechar (segundos):").pack()
+    ttk.Entry(frame_config, textvariable=tempo_fechamento_var).pack(pady=5)
+    
+    ttk.Checkbutton(frame_config, text="Tema escuro",
+                    variable=tema_var).pack(pady=5)
+    
+    ttk.Label(frame_config, text="Intervalo de atualização (segundos):").pack()
+    ttk.Entry(frame_config, textvariable=intervalo_var).pack(pady=5)
+    
+    # Configurações de voz
+    ttk.Label(frame_config, text="Configurações de Voz", 
+              font=("Arial", 12, "bold")).pack(pady=10)
+    
+    # Modificar o Checkbutton da narração para usar a variável
+    ttk.Checkbutton(frame_config, text="Ativar narração",
+                    variable=narracao_var).pack(pady=5)
+    
+    # Seletor de voz
+    ttk.Label(frame_config, text="Selecionar voz:").pack()
+    voice_selector = ttk.Combobox(frame_config,
+                                 values=list(secure_translator.speech.available_voices.keys()),
+                                 state="readonly")
+    voice_selector.pack(pady=5)
+    voice_selector.bind('<<ComboboxSelected>>',
+                       lambda e: secure_translator.speech.set_voice(voice_selector.get()))
+    
     def salvar_configuracoes():
-        global fechar_automaticamente, tempo_fechamento, tema_escuro
-        fechar_automaticamente = fechar_automaticamente_var.get()
-        tempo_fechamento = tempo_fechamento_var.get()
-        tema_escuro = tema_var.get()
+        global fechar_automaticamente, tempo_fechamento, tema_escuro, intervalo_atualizacao
         
-        # Salvar as configurações no arquivo
-        config['Config'] = {
-            'fechar_automaticamente': str(fechar_automaticamente),
-            'tempo_fechamento': str(tempo_fechamento),
-            'tema_escuro': str(tema_escuro)
-        }
-        with open('config.ini', 'w') as configfile:
-            config.write(configfile)
-        
-        config_janela.destroy()
+        try:
+            fechar_automaticamente = fechar_automaticamente_var.get()
+            tempo_fechamento = int(tempo_fechamento_var.get())
+            tema_escuro = tema_var.get()
+            novo_intervalo = float(intervalo_var.get())
+            
+            if novo_intervalo <= 0:
+                raise ValueError("Intervalo deve ser maior que zero")
+            
+            intervalo_atualizacao = novo_intervalo
+            
+            # Salvar o estado da narração
+            secure_translator.speech.voice_enabled = narracao_var.get()
+            
+            config = {
+                'fechar_automaticamente': str(fechar_automaticamente),
+                'tempo_fechamento': str(tempo_fechamento),
+                'tema_escuro': str(tema_escuro),
+                'intervalo_atualizacao': str(intervalo_atualizacao),
+                'voice_enabled': str(secure_translator.speech.voice_enabled),
+                'current_voice': secure_translator.speech.current_voice
+            }
+            
+            encrypted_config = secure_translator.security.encrypt_data(json.dumps(config))
+            with open('config.encrypted', 'w') as f:
+                f.write(encrypted_config)
+            
+            logger.info("Configurações salvas com sucesso")
+            atualizar_tema()
+            config_janela.destroy()
+            
+        except ValueError as e:
+            logger.error(f"Erro ao salvar configurações: {str(e)}")
+            messagebox.showerror("Erro", "Valores inválidos nas configurações!")
     
-    salvar_button = ttk.Button(config_janela, text="Salvar", command=salvar_configuracoes)
-    salvar_button.pack(pady=10)
+    # Botões de ação
+    frame_botoes = ttk.Frame(frame_config)
+    frame_botoes.pack(pady=20)
     
-    # Botão de sair
-    sair_button = ttk.Button(config_janela, text="Sair", command=config_janela.destroy)
-    sair_button.pack(pady=5)
+    ttk.Button(frame_botoes, text="Salvar", 
+               command=salvar_configuracoes).pack(side=tk.LEFT, padx=5)
+    ttk.Button(frame_botoes, text="Cancelar", 
+               command=config_janela.destroy).pack(side=tk.LEFT, padx=5)
 
-# Criar a interface
-tk_root = tk.Tk()
-tk_root.title("Tradutor de Tela")
-tk_root.geometry("300x150")
-tk_root.attributes('-topmost', True)  # Manter sempre no topo
-tk_root.attributes('-alpha', 0.3)  # Tornar a janela transparente
-
-tk_root.overrideredirect(True)  # Remover bordas padrão
-
-# Funções para mover e redimensionar
+def atualizar_tema():
+    cor_fundo = "black" if tema_escuro else "white"
+    cor_texto = "white" if tema_escuro else "black"
+    
+    frame_borda.configure(bg=cor_fundo)
+    botao_menu.configure(fg=cor_texto, bg=cor_fundo)
+    menu_opcoes.configure(bg="#333333" if tema_escuro else "#FFFFFF",
+                         fg=cor_texto)
+# Funções de movimento da janela
 def iniciar_mover(event):
     global movendo, pos_x, pos_y
     movendo = True
@@ -153,11 +448,10 @@ def parar_mover(event):
     global movendo
     movendo = False
 
+# Funções de redimensionamento
 def iniciar_redimensionamento(event):
     global redimensionando
     redimensionando = True
-    pos_x = event.x_root
-    pos_y = event.y_root
 
 def redimensionar_janela(event):
     if redimensionando:
@@ -169,43 +463,85 @@ def parar_redimensionamento(event):
     global redimensionando
     redimensionando = False
 
-# Criar menu suspenso
-def abrir_menu(event):
-    global menu_aberto
-    if menu_aberto:
-        menu_opcoes.unpost()
-        menu_aberto = False
-    else:
-        menu_opcoes.post(event.x_root, event.y_root)
-        menu_aberto = True
+# Interface gráfica
+tk_root = tk.Tk()
+tk_root.title("Tradutor de Tela")
+tk_root.geometry("300x150")
+tk_root.attributes('-topmost', True)
+tk_root.attributes('-alpha', 0.3)
+tk_root.overrideredirect(True)  # Esta é a linha que precisamos remover/modificar
 
-# Criar moldura para borda
-frame_borda = tk.Frame(tk_root, bd=2, relief="solid", bg="black" if tema_escuro else "white")
+# Frame principal
+frame_borda = tk.Frame(tk_root, bd=2, relief="solid", 
+                      bg="black" if tema_escuro else "white")
 frame_borda.pack(expand=True, fill="both", padx=2, pady=2)
+
+# Create menu
+menu_opcoes = tk.Menu(tk_root, tearoff=0)
+menu_opcoes.add_command(label="Configurações", 
+                       command=lambda: abrir_configuracoes())
+menu_opcoes.add_command(label="Sair", command=finalizar_programa)
+
+# Botão de menu
+botao_menu = tk.Label(frame_borda, text="⋮", 
+                     fg="white" if tema_escuro else "black",
+                     bg="black" if tema_escuro else "white",
+                     font=("Arial", 12))
+botao_menu.place(relx=0.95, rely=0.05, anchor="ne")
+botao_menu.bind("<Button-1>", abrir_menu)
+
+# Botão de tradução
+botao_traduzir = ttk.Button(frame_borda, text="Traduzir",
+                           command=alternar_modo_traducao)
+botao_traduzir.pack(pady=10)
+
+# Bindings para movimento e redimensionamento
 frame_borda.bind('<ButtonPress-1>', iniciar_mover)
 frame_borda.bind('<B1-Motion>', mover_janela)
 frame_borda.bind('<ButtonRelease-1>', parar_mover)
 
-# Criar botão discreto para menu
-botao_menu = tk.Label(frame_borda, text="⋮", fg="white" if tema_escuro else "black", bg="black" if tema_escuro else "white", font=("Arial", 12))
-botao_menu.place(relx=0.95, rely=0.05, anchor="ne")
-botao_menu.bind("<Button-1>", abrir_menu)
-
-# Criar menu de opções
-menu_opcoes = tk.Menu(tk_root, tearoff=0, bg="#333333" if tema_escuro else "#FFFFFF", fg="white" if tema_escuro else "black", font=("Arial", 10))
-menu_opcoes.add_command(label="Configurações", command=abrir_configuracoes)
-menu_opcoes.add_command(label="Sair", command=tk_root.quit)
-
-# Área de canto inferior direito para redimensionar
-resizer = tk.Frame(frame_borda, width=10, height=10, bg="gray", cursor="bottom_right_corner")
+# Área de redimensionamento
+resizer = tk.Frame(frame_borda, width=10, height=10, 
+                  bg="gray", cursor="bottom_right_corner")
 resizer.place(relx=1.0, rely=1.0, anchor="se")
+
 resizer.bind('<ButtonPress-1>', iniciar_redimensionamento)
 resizer.bind('<B1-Motion>', redimensionar_janela)
 resizer.bind('<ButtonRelease-1>', parar_redimensionamento)
 
-# Botão para traduzir
-botao_traduzir = ttk.Button(frame_borda, text="Traduzir", command=capturar_e_traduzir)
-botao_traduzir.pack(pady=10)
+# Atalhos de teclado
+tk_root.bind('<Control-t>', lambda e: alternar_modo_traducao())
+tk_root.bind('<Escape>', lambda e: parar_traducao_tempo_real())
+
+# Add window close protocol
+tk_root.protocol("WM_DELETE_WINDOW", finalizar_programa)
+
+# Carregar configurações salvas
+try:
+    if os.path.exists('config.encrypted'):
+        with open('config.encrypted', 'r') as f:
+            encrypted_data = f.read()
+            config_data = json.loads(secure_translator.security.decrypt_data(encrypted_data))
+            
+            fechar_automaticamente = config_data.get('fechar_automaticamente') == 'True'
+            tempo_fechamento = int(config_data.get('tempo_fechamento', 10))
+            tema_escuro = config_data.get('tema_escuro') == 'True'
+            intervalo_atualizacao = float(config_data.get('intervalo_atualizacao', 1.0))
+            secure_translator.speech.voice_enabled = config_data.get('voice_enabled') == 'True'
+            
+            if 'current_voice' in config_data:
+                secure_translator.speech.set_voice(config_data['current_voice'])
+                
+            atualizar_tema()
+            
+except Exception as e:
+    logger.error(f"Erro ao carregar configurações: {str(e)}")
 
 # Iniciar aplicação
-tk_root.mainloop()
+if __name__ == "__main__":
+    try:
+        tk_root.mainloop()
+    except Exception as e:
+        logger.critical(f"Erro crítico na aplicação: {str(e)}")
+        messagebox.showerror("Erro Crítico", 
+                           "Ocorreu um erro crítico na aplicação. Verifique os logs para mais detalhes.")            

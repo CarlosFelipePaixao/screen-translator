@@ -1,0 +1,149 @@
+2025-03-14 14:20:18,878 - INFO - Configurações salvas com sucesso
+2025-03-14 14:37:32,935 - INFO - Configurações salvas com sucesso
+2025-03-14 14:37:44,643 - ERROR - Translation error: 'RateLimiter' object has no attribute 'can_proceed'
+2025-03-14 14:37:44,644 - ERROR - Error in capture_and_translate: 'RateLimiter' object has no attribute 'can_proceed'
+2025-03-14 14:38:14,317 - WARNING - No text detected
+2025-03-14 14:38:17,875 - WARNING - No text detected
+2025-03-14 14:38:58,318 - INFO - Translation performed: 268 chars -> 277 chars
+2025-03-14 14:40:16,128 - INFO - Configurações salvas com sucesso
+2025-03-14 14:40:33,329 - INFO - Translation performed: 97 chars -> 106 chars
+2025-03-14 14:40:44,488 - INFO - Translation performed: 47 chars -> 50 chars
+2025-03-14 14:40:51,564 - INFO - Translation performed: 73 chars -> 77 chars
+2025-03-14 14:41:01,028 - INFO - Translation performed: 73 chars -> 77 chars
+2025-03-14 14:41:10,067 - WARNING - No text detected
+2025-03-14 14:41:24,315 - INFO - Translation performed: 81 chars -> 91 chars
+2025-03-14 14:41:35,533 - INFO - Translation performed: 81 chars -> 91 chars
+2025-03-14 14:41:54,882 - INFO - Configurações salvas com sucesso
+2025-03-14 14:42:11,762 - INFO - Translation performed: 80 chars -> 80 chars
+2025-03-14 14:42:21,735 - INFO - Translation performed: 80 chars -> 80 chars
+2025-03-14 14:42:30,434 - INFO - Configurações salvas com sucesso
+2025-03-14 14:45:26,144 - INFO - Configurações salvas com sucesso
+2025-03-14 14:45:31,837 - INFO - Configurações salvas com sucesso
+2025-03-14 14:45:42,074 - INFO - Translation performed: 80 chars -> 80 chars
+2025-03-14 14:45:44,486 - INFO - Translation performed: 80 chars -> 80 chars
+2025-03-14 14:45:46,930 - INFO - Translation performed: 80 chars -> 80 chars
+2025-03-14 14:45:49,372 - INFO - Translation performed: 80 chars -> 80 chars
+2025-03-14 14:45:52,294 - INFO - Translation performed: 64 chars -> 59 chars
+2025-03-14 14:45:54,918 - INFO - Translation performed: 67 chars -> 60 chars
+2025-03-14 14:45:57,298 - INFO - Translation performed: 67 chars -> 60 chars
+2025-03-14 14:46:00,051 - INFO - Translation performed: 81 chars -> 83 chars
+2025-03-14 14:46:02,025 - WARNING - No text detected
+2025-03-14 14:46:09,643 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:46:12,260 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:49:35,277 - WARNING - No text detected
+2025-03-14 14:49:37,149 - WARNING - No text detected
+2025-03-14 14:49:39,043 - WARNING - No text detected
+2025-03-14 14:49:40,904 - WARNING - No text detected
+2025-03-14 14:49:42,760 - WARNING - No text detected
+2025-03-14 14:49:44,655 - WARNING - No text detected
+2025-03-14 14:49:46,600 - WARNING - No text detected
+2025-03-14 14:50:04,167 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:50:06,418 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:50:08,705 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:50:10,955 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:50:18,775 - INFO - Configurações salvas com sucesso
+2025-03-14 14:50:21,572 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:50:28,153 - INFO - Translation performed: 40 chars -> 43 chars
+2025-03-14 14:50:34,833 - INFO - Translation performed: 58 chars -> 61 chars
+2025-03-14 14:50:42,536 - INFO - Translation performed: 81 chars -> 80 chars
+2025-03-14 14:50:51,798 - INFO - Translation performed: 81 chars -> 80 chars
+2025-03-14 14:51:00,977 - INFO - Translation performed: 81 chars -> 80 chars
+2025-03-14 14:51:10,110 - INFO - Translation performed: 59 chars -> 60 chars
+2025-03-14 14:51:17,608 - INFO - Translation performed: 59 chars -> 60 chars
+2025-03-14 14:51:25,094 - INFO - Translation performed: 40 chars -> 45 chars
+2025-03-14 14:51:31,352 - INFO - Translation performed: 40 chars -> 45 chars
+2025-03-14 14:51:37,751 - INFO - Translation performed: 70 chars -> 89 chars
+2025-03-14 14:51:48,036 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:52:00,628 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:58:47,395 - INFO - Translation performed: 125 chars -> 147 chars
+2025-03-14 14:58:57,045 - INFO - Configurações salvas com sucesso
+2025-03-14 14:59:00,299 - INFO - Translation performed: 126 chars -> 149 chars
+2025-03-14 14:59:02,481 - INFO - Translation performed: 126 chars -> 148 chars
+2025-03-14 14:59:03,470 - INFO - Translation performed: 125 chars -> 148 chars
+2025-03-14 14:59:05,477 - INFO - Translation performed: 126 chars -> 151 chars
+2025-03-14 14:59:06,583 - INFO - Translation performed: 125 chars -> 148 chars
+2025-03-14 14:59:08,450 - INFO - Translation performed: 130 chars -> 152 chars
+2025-03-14 14:59:09,744 - INFO - Translation performed: 125 chars -> 146 chars
+2025-03-14 14:59:11,183 - INFO - Translation performed: 125 chars -> 146 chars
+2025-03-14 14:59:21,461 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:24,460 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:26,365 - WARNING - No text detected
+2025-03-14 14:59:28,921 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:31,448 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:33,999 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:36,532 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:39,185 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:41,761 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:44,357 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:46,971 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:49,513 - INFO - Translation performed: 111 chars -> 133 chars
+2025-03-14 14:59:52,190 - INFO - Translation performed: 40 chars -> 44 chars
+2025-03-14 14:59:55,189 - INFO - Translation performed: 117 chars -> 129 chars
+2025-03-14 14:59:57,737 - INFO - Translation performed: 117 chars -> 129 chars
+2025-03-14 15:00:00,372 - INFO - Translation performed: 117 chars -> 129 chars
+2025-03-14 15:00:02,976 - INFO - Translation performed: 117 chars -> 129 chars
+2025-03-14 15:00:05,568 - INFO - Translation performed: 117 chars -> 129 chars
+2025-03-14 15:00:21,475 - INFO - Configurações salvas com sucesso
+2025-03-14 15:00:27,264 - INFO - Translation performed: 131 chars -> 144 chars
+2025-03-14 15:00:39,322 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel6.!label"
+2025-03-14 15:00:44,860 - INFO - Translation performed: 131 chars -> 144 chars
+2025-03-14 15:00:56,824 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel6.!label"
+2025-03-14 15:01:08,000 - INFO - Translation performed: 127 chars -> 131 chars
+2025-03-14 15:01:20,283 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel6.!label"
+2025-03-14 15:02:32,845 - INFO - Translation performed: 322 chars -> 274 chars
+2025-03-14 15:04:28,613 - INFO - Configurações salvas com sucesso
+2025-03-14 15:04:32,590 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:04:46,514 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:10:31,542 - INFO - Configurações salvas com sucesso
+2025-03-14 15:10:35,528 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:10:46,422 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:16:38,416 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:16:49,909 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:17:06,820 - INFO - Translation performed: 399 chars -> 402 chars
+2025-03-14 15:21:33,730 - INFO - Translation performed: 268 chars -> 277 chars
+2025-03-14 15:24:07,190 - INFO - Translation performed: 312 chars -> 341 chars
+2025-03-14 15:24:07,190 - ERROR - Translation error: 'SpeechManager' object has no attribute 'speak'
+2025-03-14 15:24:07,190 - ERROR - Error in capture_and_translate: 'SpeechManager' object has no attribute 'speak'
+2025-03-14 15:24:13,361 - INFO - Translation performed: 312 chars -> 341 chars
+2025-03-14 15:24:13,361 - ERROR - Translation error: 'SpeechManager' object has no attribute 'speak'
+2025-03-14 15:24:13,361 - ERROR - Error in capture_and_translate: 'SpeechManager' object has no attribute 'speak'
+2025-03-14 15:25:02,681 - INFO - Translation performed: 80 chars -> 73 chars
+2025-03-14 15:25:02,683 - ERROR - Translation error: 'SpeechManager' object has no attribute 'speak'
+2025-03-14 15:25:02,683 - ERROR - Error in capture_and_translate: 'SpeechManager' object has no attribute 'speak'
+2025-03-14 15:25:25,974 - WARNING - No text detected
+2025-03-14 15:27:06,454 - INFO - Translation performed: 324 chars -> 328 chars
+2025-03-14 15:27:49,688 - INFO - Translation performed: 12 chars -> 12 chars
+2025-03-14 15:27:53,682 - INFO - Translation performed: 12 chars -> 12 chars
+2025-03-14 15:28:13,125 - INFO - Translation performed: 14 chars -> 18 chars
+2025-03-14 15:28:17,579 - INFO - Translation performed: 14 chars -> 18 chars
+2025-03-14 15:28:22,722 - INFO - Translation performed: 14 chars -> 14 chars
+2025-03-14 15:28:27,205 - INFO - Translation performed: 16 chars -> 15 chars
+2025-03-14 15:28:31,640 - INFO - Translation performed: 51 chars -> 42 chars
+2025-03-14 15:28:37,903 - INFO - Translation performed: 51 chars -> 42 chars
+2025-03-14 15:28:56,102 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:29:11,518 - INFO - Translation performed: 125 chars -> 120 chars
+2025-03-14 15:29:27,200 - INFO - Translation performed: 77 chars -> 75 chars
+2025-03-14 15:29:38,041 - INFO - Translation performed: 32 chars -> 43 chars
+2025-03-14 15:29:45,665 - WARNING - No text detected
+2025-03-14 15:29:47,638 - WARNING - No text detected
+2025-03-14 15:29:50,223 - INFO - Translation performed: 33 chars -> 44 chars
+2025-03-14 15:29:57,220 - INFO - Translation performed: 79 chars -> 85 chars
+2025-03-14 15:30:08,627 - INFO - Translation performed: 79 chars -> 85 chars
+2025-03-14 15:30:20,423 - INFO - Translation performed: 70 chars -> 68 chars
+2025-03-14 15:30:29,942 - WARNING - No text detected
+2025-03-14 15:30:32,648 - INFO - Translation performed: 103 chars -> 97 chars
+2025-03-14 15:30:45,316 - INFO - Translation performed: 105 chars -> 99 chars
+2025-03-14 15:30:57,572 - INFO - Translation performed: 105 chars -> 99 chars
+2025-03-14 15:31:09,527 - INFO - Translation performed: 21 chars -> 23 chars
+2025-03-14 15:31:14,278 - INFO - Translation performed: 23 chars -> 24 chars
+2025-03-14 15:31:21,748 - INFO - Translation performed: 76 chars -> 78 chars
+2025-03-14 15:31:32,283 - INFO - Translation performed: 76 chars -> 78 chars
+2025-03-14 15:31:37,824 - INFO - Translation performed: 76 chars -> 78 chars
+2025-03-14 15:31:40,622 - INFO - Translation performed: 76 chars -> 78 chars
+2025-03-14 15:31:40,622 - ERROR - Translation error: run loop already started
+2025-03-14 15:31:40,623 - ERROR - Error in capture_and_translate: run loop already started
+2025-03-14 15:31:44,294 - INFO - Translation performed: 76 chars -> 78 chars
+2025-03-14 15:44:35,231 - INFO - Translation performed: 17 chars -> 21 chars
+2025-03-14 15:44:39,835 - INFO - Translation performed: 17 chars -> 21 chars
+2025-03-14 16:14:43,240 - ERROR - Error in translation: name 'scrolledtext' is not defined
+2025-03-14 16:14:43,241 - ERROR - Error in capture_and_translate: name 'scrolledtext' is not defined

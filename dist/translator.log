@@ -1,0 +1,45 @@
+2025-03-14 16:04:19,391 - INFO - Configurações salvas com sucesso
+2025-03-14 16:04:23,807 - INFO - Translation performed: 336 chars -> 346 chars
+2025-03-14 16:04:27,444 - INFO - Translation performed: 536 chars -> 545 chars
+2025-03-14 16:04:31,052 - INFO - Translation performed: 546 chars -> 488 chars
+2025-03-14 16:04:34,729 - INFO - Translation performed: 572 chars -> 596 chars
+2025-03-14 16:04:47,675 - INFO - Translation performed: 499 chars -> 520 chars
+2025-03-14 16:04:47,684 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel3.!label"
+2025-03-14 16:04:52,314 - INFO - Translation performed: 496 chars -> 523 chars
+2025-03-14 16:04:52,315 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel3.!label"
+2025-03-14 16:05:00,039 - INFO - Translation performed: 42 chars -> 37 chars
+2025-03-14 16:05:02,245 - INFO - Translation performed: 42 chars -> 37 chars
+2025-03-14 16:05:04,493 - INFO - Translation performed: 42 chars -> 37 chars
+2025-03-14 16:05:04,493 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel4.!label"
+2025-03-14 16:05:12,602 - INFO - Translation performed: 42 chars -> 37 chars
+2025-03-14 16:05:14,783 - INFO - Translation performed: 42 chars -> 37 chars
+2025-03-14 16:05:16,949 - INFO - Translation performed: 42 chars -> 37 chars
+2025-03-14 16:05:16,952 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel5.!label"
+2025-03-14 16:05:33,387 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:05:35,840 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:05:38,300 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:05:40,743 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:05:44,243 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:05:46,675 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:05:52,799 - INFO - Configurações salvas com sucesso
+2025-03-14 16:05:55,558 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:05:57,984 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:00,417 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:02,870 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:05,327 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:07,766 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:07,767 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel9.!label"
+2025-03-14 16:06:11,744 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:11,745 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel9.!label"
+2025-03-14 16:06:15,973 - INFO - Translation performed: 92 chars -> 91 chars
+2025-03-14 16:06:15,974 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel9.!label"
+2025-03-14 16:06:24,758 - INFO - Configurações salvas com sucesso
+2025-03-14 16:06:31,860 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:42,628 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:51,156 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:53,140 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:06:53,540 - ERROR - Translation error: run loop already started
+2025-03-14 16:06:53,540 - ERROR - Error in capture_and_translate: run loop already started
+2025-03-14 16:06:57,181 - ERROR - Error in capture_and_translate: invalid command name ".!toplevel13.!label"
+2025-03-14 16:07:00,442 - INFO - Translation performed: 76 chars -> 79 chars
+2025-03-14 16:07:01,379 - INFO - Translation performed: 75 chars -> 82 chars
